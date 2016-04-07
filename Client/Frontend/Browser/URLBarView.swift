@@ -57,19 +57,19 @@ struct URLBarViewUX {
 }
 
 protocol URLBarDelegate: class {
-    func urlBarDidPressTabs(urlBar: URLBarView)
-    func urlBarDidPressReaderMode(urlBar: URLBarView)
+    func urlBarDidPressTabs(urlBar: URLBarViewProtocol)
+    func urlBarDidPressReaderMode(urlBar: URLBarViewProtocol)
     /// - returns: whether the long-press was handled by the delegate; i.e. return `false` when the conditions for even starting handling long-press were not satisfied
-    func urlBarDidLongPressReaderMode(urlBar: URLBarView) -> Bool
-    func urlBarDidPressStop(urlBar: URLBarView)
-    func urlBarDidPressReload(urlBar: URLBarView)
-    func urlBarDidEnterOverlayMode(urlBar: URLBarView)
-    func urlBarDidLeaveOverlayMode(urlBar: URLBarView)
-    func urlBarDidLongPressLocation(urlBar: URLBarView)
-    func urlBarLocationAccessibilityActions(urlBar: URLBarView) -> [UIAccessibilityCustomAction]?
-    func urlBarDidPressScrollToTop(urlBar: URLBarView)
-    func urlBar(urlBar: URLBarView, didEnterText text: String)
-    func urlBar(urlBar: URLBarView, didSubmitText text: String)
+    func urlBarDidLongPressReaderMode(urlBar: URLBarViewProtocol) -> Bool
+    func urlBarDidPressStop(urlBar: URLBarViewProtocol)
+    func urlBarDidPressReload(urlBar: URLBarViewProtocol)
+    func urlBarDidEnterOverlayMode(urlBar: URLBarViewProtocol)
+    func urlBarDidLeaveOverlayMode(urlBar: URLBarViewProtocol)
+    func urlBarDidLongPressLocation(urlBar: URLBarViewProtocol)
+    func urlBarLocationAccessibilityActions(urlBar: URLBarViewProtocol) -> [UIAccessibilityCustomAction]?
+    func urlBarDidPressScrollToTop(urlBar: URLBarViewProtocol)
+    func urlBar(urlBar: URLBarViewProtocol, didEnterText text: String)
+    func urlBar(urlBar: URLBarViewProtocol, didSubmitText text: String)
     func urlBarDisplayTextForURL(url: NSURL?) -> String?
 }
 
@@ -639,15 +639,15 @@ class URLBarView: UIView, URLBarViewProtocol {
         })
     }
 
-    func SELdidClickAddTab() {
+    @objc func SELdidClickAddTab() {
         delegate?.urlBarDidPressTabs(self)
     }
 
-    func SELdidClickCancel() {
+    @objc func SELdidClickCancel() {
         leaveOverlayMode(didCancel: true)
     }
 
-    func SELtappedScrollToTopArea() {
+    @objc func SELtappedScrollToTopArea() {
         delegate?.urlBarDidPressScrollToTop(self)
     }
 }

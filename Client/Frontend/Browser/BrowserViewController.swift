@@ -1153,15 +1153,15 @@ extension BrowserViewController {
 
 extension BrowserViewController: URLBarDelegate {
 
-    func urlBarDidPressReload(urlBar: URLBarView) {
+    func urlBarDidPressReload(urlBar: URLBarViewProtocol) {
         tabManager.selectedTab?.reload()
     }
 
-    func urlBarDidPressStop(urlBar: URLBarView) {
+    func urlBarDidPressStop(urlBar: URLBarViewProtocol) {
         tabManager.selectedTab?.stop()
     }
 
-    func urlBarDidPressTabs(urlBar: URLBarView) {
+    func urlBarDidPressTabs(urlBar: URLBarViewProtocol) {
         self.webViewContainerToolbar.hidden = true
         updateFindInPageVisibility(visible: false)
 
@@ -1175,7 +1175,7 @@ extension BrowserViewController: URLBarDelegate {
         self.tabTrayController = tabTrayController
     }
 
-    func urlBarDidPressReaderMode(urlBar: URLBarView) {
+    func urlBarDidPressReaderMode(urlBar: URLBarViewProtocol) {
         if let tab = tabManager.selectedTab {
             if let readerMode = tab.getHelper(name: "ReaderMode") as? ReaderMode {
                 switch readerMode.state {
@@ -1190,7 +1190,7 @@ extension BrowserViewController: URLBarDelegate {
         }
     }
 
-    func urlBarDidLongPressReaderMode(urlBar: URLBarView) -> Bool {
+    func urlBarDidLongPressReaderMode(urlBar: URLBarViewProtocol) -> Bool {
         guard let tab = tabManager.selectedTab,
                url = tab.displayURL,
                result = profile.readingList?.createRecordWithURL(url.absoluteString, title: tab.title ?? "", addedBy: UIDevice.currentDevice().name)
@@ -1210,7 +1210,7 @@ extension BrowserViewController: URLBarDelegate {
         return true
     }
 
-    func locationActionsForURLBar(urlBar: URLBarView) -> [AccessibleAction] {
+    func locationActionsForURLBar(urlBar: URLBarViewProtocol) -> [AccessibleAction] {
         if UIPasteboard.generalPasteboard().string != nil {
             return [pasteGoAction, pasteAction, copyAddressAction]
         } else {
@@ -1227,7 +1227,7 @@ extension BrowserViewController: URLBarDelegate {
         return profile.searchEngines.queryForSearchURL(searchURL) ?? url?.absoluteString
     }
 
-    func urlBarDidLongPressLocation(urlBar: URLBarView) {
+    func urlBarDidLongPressLocation(urlBar: URLBarViewProtocol) {
         let longPressAlertController = UIAlertController(title: nil, message: nil, preferredStyle: .ActionSheet)
 
         for action in locationActionsForURLBar(urlBar) {
@@ -1240,8 +1240,8 @@ extension BrowserViewController: URLBarDelegate {
 
         let setupPopover = { [unowned self] in
             if let popoverPresentationController = longPressAlertController.popoverPresentationController {
-                popoverPresentationController.sourceView = urlBar
-                popoverPresentationController.sourceRect = urlBar.frame
+                popoverPresentationController.sourceView = urlBar.view
+                popoverPresentationController.sourceRect = urlBar.view.frame
                 popoverPresentationController.permittedArrowDirections = .Any
                 popoverPresentationController.delegate = self
             }
@@ -1257,7 +1257,7 @@ extension BrowserViewController: URLBarDelegate {
         self.presentViewController(longPressAlertController, animated: true, completion: nil)
     }
 
-    func urlBarDidPressScrollToTop(urlBar: URLBarView) {
+    func urlBarDidPressScrollToTop(urlBar: URLBarViewProtocol) {
         if let selectedTab = tabManager.selectedTab {
             // Only scroll to top if we are not showing the home view controller
             if homePanelController == nil {
@@ -1266,11 +1266,11 @@ extension BrowserViewController: URLBarDelegate {
         }
     }
 
-    func urlBarLocationAccessibilityActions(urlBar: URLBarView) -> [UIAccessibilityCustomAction]? {
+    func urlBarLocationAccessibilityActions(urlBar: URLBarViewProtocol) -> [UIAccessibilityCustomAction]? {
         return locationActionsForURLBar(urlBar).map { $0.accessibilityCustomAction }
     }
 
-    func urlBar(urlBar: URLBarView, didEnterText text: String) {
+    func urlBar(urlBar: URLBarViewProtocol, didEnterText text: String) {
         searchLoader.query = text
 
         if text.isEmpty {
@@ -1281,7 +1281,7 @@ extension BrowserViewController: URLBarDelegate {
         }
     }
 
-    func urlBar(urlBar: URLBarView, didSubmitText text: String) {
+    func urlBar(urlBar: URLBarViewProtocol, didSubmitText text: String) {
         // If we can't make a valid URL, do a search query.
         // If we still don't have a valid URL, something is broken. Give up.
         guard let url = URIFixup.getURL(text) ??
@@ -1293,11 +1293,11 @@ extension BrowserViewController: URLBarDelegate {
         finishEditingAndSubmit(url, visitType: VisitType.Typed)
     }
 
-    func urlBarDidEnterOverlayMode(urlBar: URLBarView) {
+    func urlBarDidEnterOverlayMode(urlBar: URLBarViewProtocol) {
         showHomePanelController(inline: false)
     }
 
-    func urlBarDidLeaveOverlayMode(urlBar: URLBarView) {
+    func urlBarDidLeaveOverlayMode(urlBar: URLBarViewProtocol) {
         hideSearchController()
         updateInContentHomePanel(tabManager.selectedTab?.url)
     }
