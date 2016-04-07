@@ -73,7 +73,50 @@ protocol URLBarDelegate: class {
     func urlBarDisplayTextForURL(url: NSURL?) -> String?
 }
 
-class URLBarView: UIView {
+protocol URLBarViewProtocol: Themeable {
+    var view: UIView { get }
+
+    var locationBorderColor: UIColor { get set }
+    var locationActiveBorderColor: UIColor { get set }
+
+    weak var delegate: URLBarDelegate? { get }
+    weak var browserToolbarDelegate: BrowserToolbarDelegate? { get }
+
+    var helper: BrowserToolbarHelper? { get }
+    var isTransitioning: Bool { get set }
+    var toolbarIsShowing: Bool { get }
+    var inOverlayMode: Bool { get }
+
+    var locationView: BrowserLocationView { get set }
+    var shareButton: UIButton { get set }
+    var bookmarkButton: UIButton { get set }
+    var forwardButton: UIButton { get set }
+    var backButton: UIButton { get set }
+    var stopReloadButton: UIButton { get set }
+
+    var actionButtons: [UIButton] { get set }
+
+    var currentURL: NSURL? { get set }
+
+    func updateAlphaForSubviews(alpha: CGFloat)
+    func updateTabCount(count: Int, animated: Bool)
+    func updateProgressBar(progress: Float)
+    func updateReaderModeState(state: ReaderModeState)
+
+    func setAutocompleteSuggestion(suggestion: String?)
+    func setShowToolbar(shouldShow: Bool)
+
+    func enterOverlayMode(locationText: String?, pasted: Bool)
+    func leaveOverlayMode(didCancel cancel: Bool)
+
+    func SELdidClickCancel()
+}
+
+class URLBarView: UIView, URLBarViewProtocol {
+    var view: UIView {
+        return self
+    }
+
     // Additional UIAppearance-configurable properties
     dynamic var locationBorderColor: UIColor = URLBarViewUX.TextFieldBorderColor {
         didSet {
