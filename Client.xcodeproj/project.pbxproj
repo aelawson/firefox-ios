@@ -550,7 +550,10 @@
 		E66464911C10CA9C00AF05CE /* SearchInputViewRefTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E66464901C10CA9C00AF05CE /* SearchInputViewRefTests.swift */; };
 		E66464EE1C10D98000AF05CE /* AssertionUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = E66464ED1C10D98000AF05CE /* AssertionUtils.swift */; };
 		E66C5B481BDA81050051AA93 /* UIImage+ImageEffects.m in Sources */ = {isa = PBXBuildFile; fileRef = E66C5B471BDA81050051AA93 /* UIImage+ImageEffects.m */; };
+		E676F7B81CB2FFA300C0B8C2 /* URLToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = E676F7B71CB2FFA300C0B8C2 /* URLToolbar.swift */; };
+		E676F7C71CB300C400C0B8C2 /* URLToolbarRefTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E676F7C61CB300C400C0B8C2 /* URLToolbarRefTests.swift */; };
 		E679FDBB1B99CF10008C220A /* PrivateBrowsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E679FDBA1B99CF10008C220A /* PrivateBrowsingTests.swift */; };
+		E67DC8A91CB57A7C00ED7EE6 /* ToolbarButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = E67DC8A81CB57A7C00ED7EE6 /* ToolbarButtons.swift */; };
 		E68AEDB01B18F81A00133D99 /* SwipeAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E68AEDAF1B18F81A00133D99 /* SwipeAnimator.swift */; };
 		E68E39BE1C46F42000B85F42 /* AppSettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E68E39BD1C46F42000B85F42 /* AppSettingsTableViewController.swift */; };
 		E68E7ACB1CAC1D4500FDCA76 /* PagingPasscodeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E68E7ACA1CAC1D4500FDCA76 /* PagingPasscodeViewController.swift */; };
@@ -1540,7 +1543,10 @@
 		E66464ED1C10D98000AF05CE /* AssertionUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AssertionUtils.swift; sourceTree = "<group>"; };
 		E66C5B461BDA81050051AA93 /* UIImage+ImageEffects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+ImageEffects.h"; sourceTree = "<group>"; };
 		E66C5B471BDA81050051AA93 /* UIImage+ImageEffects.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+ImageEffects.m"; sourceTree = "<group>"; };
+		E676F7B71CB2FFA300C0B8C2 /* URLToolbar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLToolbar.swift; sourceTree = "<group>"; };
+		E676F7C61CB300C400C0B8C2 /* URLToolbarRefTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = URLToolbarRefTests.swift; sourceTree = "<group>"; };
 		E679FDBA1B99CF10008C220A /* PrivateBrowsingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrivateBrowsingTests.swift; sourceTree = "<group>"; };
+		E67DC8A81CB57A7C00ED7EE6 /* ToolbarButtons.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ToolbarButtons.swift; sourceTree = "<group>"; };
 		E682F53C1C89E72600ECB6B2 /* FennecAurora.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = FennecAurora.xcconfig; path = Configuration/FennecAurora.xcconfig; sourceTree = "<group>"; };
 		E68AEDAF1B18F81A00133D99 /* SwipeAnimator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwipeAnimator.swift; sourceTree = "<group>"; };
 		E68E39BD1C46F42000B85F42 /* AppSettingsTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppSettingsTableViewController.swift; sourceTree = "<group>"; };
@@ -2396,8 +2402,10 @@
 				E65607601C08B4E200534B02 /* SearchInputView.swift */,
 				E63ED7D71BFCD9990097D08E /* LoginTableViewCell.swift */,
 				7B3631E91C244FEE00D12AF9 /* Theme.swift */,
-				0BB5B2871AC0A2B90052877D /* Toolbar.swift */,
 				59A68B1F857A8638598A63A0 /* TwoLineCell.swift */,
+				0BB5B2871AC0A2B90052877D /* Toolbar.swift */,
+				E67DC8A81CB57A7C00ED7EE6 /* ToolbarButtons.swift */,
+				E676F7B71CB2FFA300C0B8C2 /* URLToolbar.swift */,
 			);
 			path = Widgets;
 			sourceTree = "<group>";
@@ -2715,6 +2723,7 @@
 				E66464901C10CA9C00AF05CE /* SearchInputViewRefTests.swift */,
 				E63ED7B31BFCD9800097D08E /* LoginTableViewCellRefTests.swift */,
 				E6927ECE1C7B722300D03F75 /* ErrorToastRefTests.swift */,
+				E676F7C61CB300C400C0B8C2 /* URLToolbarRefTests.swift */,
 				E65C5BE11BEA525800D28BEF /* Other */,
 			);
 			path = NativeRefTests;
@@ -4370,6 +4379,7 @@
 				E65C5BD41BEA4F8A00D28BEF /* FBSnapshotTestCasePlatform.m in Sources */,
 				E6927ECF1C7B722300D03F75 /* ErrorToastRefTests.swift in Sources */,
 				E63ED8091BFCF9770097D08E /* SwiftSupport.swift in Sources */,
+				E676F7C71CB300C400C0B8C2 /* URLToolbarRefTests.swift in Sources */,
 				E63ED7B41BFCD9800097D08E /* LoginTableViewCellRefTests.swift in Sources */,
 				E65C5BD31BEA4F8A00D28BEF /* FBSnapshotTestCase.m in Sources */,
 			);
@@ -4437,6 +4447,7 @@
 				2F44FC721A9E840300FD20CC /* SettingsNavigationController.swift in Sources */,
 				E69E06BA1C76173D00D0F926 /* RequirePasscodeIntervalViewController.swift in Sources */,
 				D3BA7E0E1B0E934F00153782 /* ContextMenuHelper.swift in Sources */,
+				E67DC8A91CB57A7C00ED7EE6 /* ToolbarButtons.swift in Sources */,
 				0AE491A61A41C88C0046C724 /* BackForwardListViewController.swift in Sources */,
 				E660BE061BB0666D009AC090 /* InnerStrokedView.swift in Sources */,
 				0BF648111A9C54E900BA963C /* TopSitesPanel.swift in Sources */,
@@ -4526,6 +4537,7 @@
 				7B59FC4A1C68E9B600F58EF5 /* SWUtilityButtonView.m in Sources */,
 				59A68FD5260B8D520F890F4A /* ReaderPanel.swift in Sources */,
 				E40FAB0C1A7ABB77009CB80D /* WebServer.swift in Sources */,
+				E676F7B81CB2FFA300C0B8C2 /* URLToolbar.swift in Sources */,
 				59A68D66379CFA85C4EAF00B /* TwoLineCell.swift in Sources */,
 				E49943F51AE6879C00BF9DE4 /* IntroViewController.swift in Sources */,
 			);
