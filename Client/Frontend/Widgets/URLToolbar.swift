@@ -244,3 +244,160 @@ private class CurveBackgroundView: UIView {
         CGContextRestoreGState(context)
     }
 }
+
+class URLBarView_V2: URLToolbar {
+    lazy var shareButton: UIButton = .shareButton()
+    lazy var bookmarkButton: UIButton = .bookmarkedButton()
+    lazy var forwardButton: UIButton = .forwardButton()
+    lazy var backButton: UIButton = .backButton()
+    lazy var stopReloadButton: UIButton = .reloadButton()
+    lazy var actionButtons: [UIButton] = [
+        self.shareButton,
+        self.bookmarkButton,
+        self.forwardButton,
+        self.backButton,
+        self.stopReloadButton
+    ]
+
+    var locationView = BrowserLocationView()
+    var currentURL: NSURL? = nil
+
+    var locationBorderColor: UIColor = .redColor()
+    var locationActiveBorderColor: UIColor = .blueColor()
+    var helper: BrowserToolbarHelper?
+    var isTransitioning: Bool = false
+
+    weak var delegate: URLBarDelegate?
+    weak var browserToolbarDelegate: BrowserToolbarDelegate?
+
+    private(set) var toolbarIsShowing: Bool = false
+    private(set) var inOverlayMode: Bool = false
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+
+    override func traitCollectionDidChange(previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+
+        if traitCollection.horizontalSizeClass == .Regular {
+            insideLeftButtons = [backButton, forwardButton, stopReloadButton]
+            insideRightButtons = [shareButton, bookmarkButton]
+        } else {
+            insideLeftButtons = []
+            insideRightButtons = []
+        }
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+}
+
+extension URLBarView_V2: BrowserToolbarProtocol {
+    func updateBackStatus(canGoBack: Bool) {
+        backButton.enabled = canGoBack
+    }
+
+    func updateForwardStatus(canGoForward: Bool) {
+        forwardButton.enabled = canGoForward
+    }
+
+    func updateBookmarkStatus(isBookmarked: Bool) {
+        bookmarkButton.selected = isBookmarked
+    }
+
+    func updateReloadStatus(isLoading: Bool) {
+        if isLoading {
+            stopReloadButton.setImage(UIImage.stopIcon(), forState: .Normal)
+            stopReloadButton.setImage(UIImage.stopPressedIcon(), forState: .Highlighted)
+        } else {
+            stopReloadButton.setImage(UIImage.reloadIcon(), forState: .Normal)
+            stopReloadButton.setImage(UIImage.reloadPressedIcon(), forState: .Highlighted)
+        }
+    }
+
+    func updatePageStatus(isWebPage isWebPage: Bool) {
+        bookmarkButton.enabled = isWebPage
+        stopReloadButton.enabled = isWebPage
+        shareButton.enabled = isWebPage
+    }
+}
+
+extension URLBarView_V2: BrowserLocationViewDelegate {
+    func browserLocationViewDidLongPressReaderMode(browserLocationView: BrowserLocationView) -> Bool {
+        return delegate?.urlBarDidLongPressReaderMode(self) ?? false
+    }
+
+    func browserLocationViewDidTapLocation(browserLocationView: BrowserLocationView) {
+        let locationText = delegate?.urlBarDisplayTextForURL(locationView.url)
+        enterOverlayMode(locationText, pasted: false)
+    }
+
+    func browserLocationViewDidLongPressLocation(browserLocationView: BrowserLocationView) {
+        delegate?.urlBarDidLongPressLocation(self)
+    }
+
+    func browserLocationViewDidTapReload(browserLocationView: BrowserLocationView) {
+        delegate?.urlBarDidPressReload(self)
+    }
+    
+    func browserLocationViewDidTapStop(browserLocationView: BrowserLocationView) {
+        delegate?.urlBarDidPressStop(self)
+    }
+
+    func browserLocationViewDidTapReaderMode(browserLocationView: BrowserLocationView) {
+        delegate?.urlBarDidPressReaderMode(self)
+    }
+
+    func browserLocationViewLocationAccessibilityActions(browserLocationView: BrowserLocationView) -> [UIAccessibilityCustomAction]? {
+        return delegate?.urlBarLocationAccessibilityActions(self)
+    }
+}
+
+extension URLBarView_V2: URLBarViewProtocol {
+    var view: UIView {
+        return self
+    }
+
+    func updateAlphaForSubviews(alpha: CGFloat) {
+
+    }
+
+    func updateTabCount(count: Int, animated: Bool) {
+
+    }
+
+    func updateProgressBar(progress: Float) {
+
+    }
+
+    func updateReaderModeState(state: ReaderModeState) {
+
+    }
+
+    func setAutocompleteSuggestion(suggestion: String?) {
+
+    }
+
+    func setShowToolbar(shouldShow: Bool) {
+
+    }
+
+    func enterOverlayMode(locationText: String?, pasted: Bool) {
+
+    }
+
+    func leaveOverlayMode(didCancel cancel: Bool = false) {
+
+    }
+
+    func applyTheme(themeName: String) {
+        
+    }
+
+    func SELdidClickCancel() {
+
+    }
+}
