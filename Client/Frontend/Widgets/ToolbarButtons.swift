@@ -4,40 +4,112 @@
 
 import Foundation
 
-enum ToolbarButtonTag: Int {
-    case Back
-    case Forward
-    case Reload
-    case Share
-    case Bookmarked
-}
-
 public class ToolbarButton: UIButton {
     private class func createToolbarButton(
         iconForState iconForState: [UIControlState: UIImage],
-        accessibilityLabel: String,
-        tag: ToolbarButtonTag? = nil
+        accessibilityLabel: String
     ) -> ToolbarButton {
         let button = ToolbarButton()
         for (state, icon) in iconForState { button.setImage(icon, forState: state) }
         button.accessibilityLabel = accessibilityLabel
-        if let tag = tag {
-            button.tag = tag.rawValue
-        }
         return button
+    }
+}
+
+/// Custom ToolbarButton that renders the Tab count and flip animations
+class TabCountToolbarButton: ToolbarButton {
+    private let tabCount = TabCountView(count: 1)
+
+    var count: Int {
+        return tabCount.count
+    }
+
+    convenience init() {
+        self.init(frame: CGRect.zero)
+    }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        addSubview(tabCount)
+        setupTabCountViewConstriants(tabCount)
+    }
+
+    private func setupTabCountViewConstriants(view: TabCountView) {
+        view.snp_makeConstraints { make in
+            make.edges.equalTo(self).inset(UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10))
+        }
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func setCount(count: Int, animated: Bool = true) {
+        if animated {
+            flipAndIncrement()
+        } else {
+            tabCount.count = count
+        }
+    }
+
+    func flipAndIncrement() {
+        let newCount = count + 1
+        let newCountView = TabCountView(count: newCount)
+        addSubview(newCountView)
+        setupTabCountViewConstriants(newCountView)
+        layoutIfNeeded()
+
+        // Instead of changing the anchorPoint of the CALayer, lets alter the rotation matrix math to be
+        // a rotation around a non-origin point
+        let frame = tabCount.frame
+        let halfTitleHeight = CGRectGetHeight(frame) / 2
+
+        var newFlipTransform = CATransform3DIdentity
+        newFlipTransform = CATransform3DTranslate(newFlipTransform, 0, halfTitleHeight, 0)
+        newFlipTransform.m34 = -1.0 / 200.0 // add some perspective
+        newFlipTransform = CATransform3DRotate(newFlipTransform, CGFloat(-M_PI_2), 1.0, 0.0, 0.0)
+        newCountView.layer.transform = newFlipTransform
+
+        var oldFlipTransform = CATransform3DIdentity
+        oldFlipTransform = CATransform3DTranslate(oldFlipTransform, 0, halfTitleHeight, 0)
+        oldFlipTransform.m34 = -1.0 / 200.0 // add some perspective
+        oldFlipTransform = CATransform3DRotate(oldFlipTransform, CGFloat(M_PI_2), 1.0, 0.0, 0.0)
+
+        UIView.animateWithDuration(1.5,
+                                   delay: 0,
+                                   usingSpringWithDamping: 0.5,
+                                   initialSpringVelocity: 0.0,
+                                   options: UIViewAnimationOptions.CurveEaseInOut,
+                                   animations: {
+                                        newCountView.layer.transform = CATransform3DIdentity
+                                        self.tabCount.layer.transform = oldFlipTransform
+                                        self.tabCount.layer.opacity = 0
+
+                                   },
+                                   completion: { finished in
+                                        self.tabCount.layer.opacity = 1
+                                        self.tabCount.layer.transform = CATransform3DIdentity
+                                        if finished {
+                                            self.tabCount.count = newCount
+                                        }
+                                        newCountView.removeFromSuperview()
+                                   })
     }
 }
 
 // MARK: - Browser Toolbar Buttons
 extension ToolbarButton {
+    class func tabsButton() -> ToolbarButton {
+        return TabCountToolbarButton()
+    }
+
     class func backButton() -> ToolbarButton {
         return createToolbarButton(
             iconForState: [
                 .Normal: UIImage.backIcon(),
                 .Highlighted: UIImage.backPressedIcon()
             ],
-            accessibilityLabel: NSLocalizedString("Back", comment: "Accessibility Label for the browser toolbar Back button"),
-            tag: ToolbarButtonTag.Back
+            accessibilityLabel: NSLocalizedString("Back", comment: "Accessibility Label for the browser toolbar Back button")
         )
     }
 
@@ -47,8 +119,7 @@ extension ToolbarButton {
                 .Normal: UIImage.forwardIcon(),
                 .Highlighted: UIImage.forwardPressedIcon()
             ],
-            accessibilityLabel: NSLocalizedString("Forward", comment: "Accessibility Label for the browser toolbar Forward button"),
-            tag: ToolbarButtonTag.Forward
+            accessibilityLabel: NSLocalizedString("Forward", comment: "Accessibility Label for the browser toolbar Forward button")
         )
     }
 
@@ -58,8 +129,7 @@ extension ToolbarButton {
                 .Normal: UIImage.reloadIcon(),
                 .Highlighted: UIImage.reloadPressedIcon()
             ],
-            accessibilityLabel: NSLocalizedString("Reload", comment: "Accessibility Label for the browser toolbar Reload button"),
-            tag: ToolbarButtonTag.Reload
+            accessibilityLabel: NSLocalizedString("Reload", comment: "Accessibility Label for the browser toolbar Reload button")
         )
     }
 
@@ -69,8 +139,7 @@ extension ToolbarButton {
                 .Normal: UIImage.shareIcon(),
                 .Highlighted: UIImage.sharePressedIcon()
             ],
-            accessibilityLabel: NSLocalizedString("Share", comment: "Accessibility Label for the browser toolbar Share button"),
-            tag: ToolbarButtonTag.Share
+            accessibilityLabel: NSLocalizedString("Share", comment: "Accessibility Label for the browser toolbar Share button")
         )
     }
 
@@ -81,8 +150,7 @@ extension ToolbarButton {
                 .Highlighted: UIImage.bookmarkPressedIcon(),
                 .Selected: UIImage.bookmarkSelectedIcon()
             ],
-            accessibilityLabel: NSLocalizedString("Bookmark", comment: "Accessibility Label for the browser toolbar Bookmark button"),
-            tag: ToolbarButtonTag.Bookmarked
+            accessibilityLabel: NSLocalizedString("Bookmark", comment: "Accessibility Label for the browser toolbar Bookmark button")
         )
     }
 }

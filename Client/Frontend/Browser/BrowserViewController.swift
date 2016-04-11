@@ -36,7 +36,7 @@ private struct BrowserViewControllerUX {
 class BrowserViewController: UIViewController {
     var homePanelController: HomePanelViewController?
     var webViewContainer: UIView!
-    var urlBar: URLBarView!
+    var urlBar: protocol<URLBarViewProtocol, BrowserToolbarProtocol, BrowserLocationViewDelegate>!
     var readerModeBar: ReaderModeBarView?
     var readerModeCache: ReaderModeCache
     private var statusBarOverlay: UIView!
@@ -298,13 +298,24 @@ class BrowserViewController: UIViewController {
         view.addSubview(topTouchArea)
 
         log.debug("BVC setting up URL bar…")
+
         // Setup the URL bar, wrapped in a view to get transparency effect
-        urlBar = URLBarView()
-        urlBar.translatesAutoresizingMaskIntoConstraints = false
-        urlBar.delegate = self
-        urlBar.browserToolbarDelegate = self
-        header = BlurWrapper(view: urlBar)
-        view.addSubview(header)
+
+        if AppConstants.MOZ_URL_BAR_V2 {
+            let urlBarV2 = URLBarView_V2()
+            urlBarV2.delegate = self
+            urlBarV2.browserToolbarDelegate = self
+            header = BlurWrapper(view: urlBarV2)
+            view.addSubview(header)
+            self.urlBar = urlBarV2
+        } else {
+            let legacyURLBar = URLBarView()
+            legacyURLBar.delegate = self
+            legacyURLBar.browserToolbarDelegate = self
+            header = BlurWrapper(view: legacyURLBar)
+            view.addSubview(header)
+            self.urlBar = legacyURLBar
+        }
 
         // UIAccessibilityCustomAction subclass holding an AccessibleAction instance does not work, thus unable to generate AccessibleActions and UIAccessibilityCustomActions "on-demand" and need to make them "persistent" e.g. by being stored in BVC
         pasteGoAction = AccessibleAction(name: NSLocalizedString("Paste & Go", comment: "Paste the URL into the location bar and visit"), handler: { () -> Bool in
@@ -354,7 +365,7 @@ class BrowserViewController: UIViewController {
     }
 
     private func setupConstraints() {
-        urlBar.snp_makeConstraints { make in
+        urlBar.view.snp_makeConstraints { make in
             make.edges.equalTo(self.header)
         }
 
@@ -616,12 +627,12 @@ class BrowserViewController: UIViewController {
             make.bottom.left.right.equalTo(self.footer)
             make.height.equalTo(UIConstants.ToolbarHeight)
         }
-        urlBar.setNeedsUpdateConstraints()
+        urlBar.view.setNeedsUpdateConstraints()
 
         // Remake constraints even if we're already showing the home controller.
         // The home controller may change sizes if we tap the URL bar while on about:home.
         homePanelController?.view.snp_remakeConstraints { make in
-            make.top.equalTo(self.urlBar.snp_bottom)
+            make.top.equalTo(self.urlBar.view.snp_bottom)
             make.left.right.equalTo(self.view)
             if self.homePanelIsInline {
                 make.bottom.equalTo(self.toolbar?.snp_top ?? self.view.snp_bottom)
@@ -732,7 +743,7 @@ class BrowserViewController: UIViewController {
         addChildViewController(searchController!)
         view.addSubview(searchController!.view)
         searchController!.view.snp_makeConstraints { make in
-            make.top.equalTo(self.urlBar.snp_bottom)
+            make.top.equalTo(self.urlBar.view.snp_bottom)
             make.left.right.bottom.equalTo(self.view)
             return
         }
@@ -754,7 +765,7 @@ class BrowserViewController: UIViewController {
 
     private func finishEditingAndSubmit(url: NSURL, visitType: VisitType) {
         urlBar.currentURL = url
-        urlBar.leaveOverlayMode()
+        urlBar.leaveOverlayMode(didCancel: false)
 
         guard let tab = tabManager.selectedTab else {
             return
@@ -1339,7 +1350,7 @@ extension BrowserViewController: BrowserToolbarDelegate {
         let controller = UIAlertController(title: nil, message: nil, preferredStyle: .ActionSheet)
         controller.addAction(UIAlertAction(title: toggleActionTitle, style: .Default, handler: { _ in tab.toggleDesktopSite() }))
         controller.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment:"Action Sheet Cancel Button"), style: .Cancel, handler: nil))
-        controller.popoverPresentationController?.sourceView = toolbar ?? urlBar
+        controller.popoverPresentationController?.sourceView = toolbar ?? urlBar.view
         controller.popoverPresentationController?.sourceRect = button.frame
         presentViewController(controller, animated: true, completion: nil)
     }

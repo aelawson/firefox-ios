@@ -4,9 +4,11 @@
 
 import Foundation
 import SnapKit
+import Shared
 
 private let buttonSize: CGFloat = 40
 
+/// Flexible URL Toolbar view for laying out address field along with toolbar buttons
 class URLToolbar: UIView {
     var curveRightButtons = [ToolbarButton]() {
         didSet {
@@ -53,34 +55,28 @@ class URLToolbar: UIView {
         }
     }
 
+    var locationTextField: ToolbarTextField {
+        return addressContainer.locationTextField
+    }
+
+    var locationView: BrowserLocationView {
+        return addressContainer.locationView
+    }
+
     private func didSetToolbarButtons(newButtons: [ToolbarButton], forContainer container: ToolbarButtonContainer) {
         container.buttons = newButtons
         setNeedsUpdateConstraints()
         setNeedsLayout()
     }
 
-//    let locationInputView = ToolbarTextField()
-    private lazy var locationContainer: UIView = {
-        let locationContainer = UIView()
-
-        // Enable clipping to apply the rounded edges to subviews.
-        locationContainer.clipsToBounds = true
-
-        locationContainer.layer.borderColor = URLBarViewUX.TextFieldBorderColor.CGColor
-        locationContainer.layer.cornerRadius = URLBarViewUX.TextFieldCornerRadius
-        locationContainer.layer.borderWidth = URLBarViewUX.TextFieldBorderWidth
-
-        return locationContainer
-    }()
-
     private let curveRightButtonContainer = ToolbarButtonContainer()
     private let insideRightButtonContainer = ToolbarButtonContainer()
     private let insideLeftButtonContainer = ToolbarButtonContainer()
 
     private let curveBackgroundView = CurveBackgroundView()
+    private let addressContainer = AddressSearchContainer()
 
-    private let locationViewHeight: CGFloat = 32
-    private let locationViewMargin: CGFloat = 20
+    private let locationViewMargin: CGFloat = 8
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -88,7 +84,7 @@ class URLToolbar: UIView {
         addSubview(curveRightButtonContainer)
         addSubview(insideRightButtonContainer)
         addSubview(insideLeftButtonContainer)
-        addSubview(locationContainer)
+        addSubview(addressContainer)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -97,37 +93,90 @@ class URLToolbar: UIView {
 
     override func updateConstraints() {
         super.updateConstraints()
-        curveRightButtonContainer.snp_remakeConstraints { make in
-            make.top.bottom.right.equalTo(self)
-        }
-        curveRightButtonContainer.setContentHuggingPriority(UILayoutPriorityDefaultHigh, forAxis: .Horizontal)
 
         curveBackgroundView.snp_remakeConstraints { make in
             make.left.top.bottom.equalTo(self)
             make.right.equalTo(curveRightButtonContainer.snp_left)
         }
 
+        curveRightButtonContainer.snp_remakeConstraints { make in
+            make.top.bottom.right.equalTo(self)
+        }
+        curveRightButtonContainer.setContentHuggingPriority(UILayoutPriorityDefaultHigh, forAxis: .Horizontal)
+
         insideRightButtonContainer.snp_remakeConstraints { make in
-            make.top.bottom.equalTo(curveBackgroundView)
-            make.right.equalTo(curveBackgroundView).offset(-40)
+            make.top.bottom.equalTo(self)
+            make.right.equalTo(curveBackgroundView.snp_right).offset(-20)
         }
         insideRightButtonContainer.setContentHuggingPriority(UILayoutPriorityDefaultHigh, forAxis: .Horizontal)
 
         insideLeftButtonContainer.snp_remakeConstraints { make in
-            make.top.bottom.equalTo(curveBackgroundView)
-            make.left.equalTo(curveBackgroundView).offset(10)
+            make.top.bottom.equalTo(self)
+            make.left.equalTo(self).offset(0)
         }
         insideLeftButtonContainer.setContentHuggingPriority(UILayoutPriorityDefaultHigh, forAxis: .Horizontal)
 
-        locationContainer.snp_remakeConstraints { make in
+        addressContainer.snp_remakeConstraints { make in
             make.centerY.equalTo(curveBackgroundView)
             make.left.equalTo(insideLeftButtonContainer.snp_right).offset(locationViewMargin)
             make.right.equalTo(insideRightButtonContainer.snp_left).offset(-locationViewMargin)
-            make.height.equalTo(locationViewHeight)
         }
+        addressContainer.setContentHuggingPriority(UILayoutPriorityDefaultLow, forAxis: .Horizontal)
     }
 }
 
+/// Address/search input field and associated subviews
+private class AddressSearchContainer: UIView {
+    private let locationViewHeight: CGFloat = 32
+
+    private lazy var locationTextField: ToolbarTextField = {
+        let locationTextField = ToolbarTextField()
+        locationTextField.keyboardType = UIKeyboardType.WebSearch
+        locationTextField.autocorrectionType = UITextAutocorrectionType.No
+        locationTextField.autocapitalizationType = UITextAutocapitalizationType.None
+        locationTextField.returnKeyType = UIReturnKeyType.Go
+        locationTextField.clearButtonMode = UITextFieldViewMode.WhileEditing
+        locationTextField.font = UIConstants.DefaultChromeFont
+        locationTextField.accessibilityIdentifier = "address"
+        locationTextField.accessibilityLabel = Strings.ChromeAddressAccessibilityLabel
+        return locationTextField
+    }()
+
+    lazy var locationView: BrowserLocationView = {
+        let locationView = BrowserLocationView()
+        locationView.readerModeState = ReaderModeState.Unavailable
+        return locationView
+    }()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        clipsToBounds = true
+        userInteractionEnabled = true
+        backgroundColor = .whiteColor()
+
+        layer.borderColor = URLBarViewUX.TextFieldBorderColor.CGColor
+        layer.cornerRadius = URLBarViewUX.TextFieldCornerRadius
+        layer.borderWidth = URLBarViewUX.TextFieldBorderWidth
+
+        addSubview(locationView)
+        addSubview(locationTextField)
+
+        locationView.snp_makeConstraints { $0.edges.equalTo(self) }
+        locationTextField.snp_makeConstraints { $0.edges.equalTo(self.locationView.urlTextField) }
+
+        locationTextField.hidden = true
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private override func intrinsicContentSize() -> CGSize {
+        return CGSize(width: 0, height: locationViewHeight)
+    }
+}
+
+/// Container which layouts many toolbar buttons
 private class ToolbarButtonContainer: UIView {
     var buttons: [ToolbarButton] = [] {
         didSet(oldButtons) {
@@ -142,6 +191,7 @@ private class ToolbarButtonContainer: UIView {
     }
 
     private func invalidate() {
+        invalidateIntrinsicContentSize()
         setNeedsUpdateConstraints()
         setNeedsLayout()
     }
@@ -170,15 +220,17 @@ private class ToolbarButtonContainer: UIView {
         let buttonCount = CGFloat(buttons.count)
         return CGSize(
             width: buttonCount * buttonSize + max(buttonCount - 1 * spacing, 0),
-            height: CGFloat.max
+            height: 0
         )
     }
 }
 
+/// Firefox curved tab background view
 private class CurveBackgroundView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.contentMode = .Redraw
+        self.opaque = false
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -242,171 +294,5 @@ private class CurveBackgroundView: UIView {
         CGContextAddPath(context, path.CGPath)
         CGContextFillPath(context)
         CGContextRestoreGState(context)
-    }
-}
-
-class URLBarView_V2: URLToolbar {
-    private var _shareButton: ToolbarButton = .shareButton()
-    private var _bookmarkButton: ToolbarButton = .bookmarkedButton()
-    private var _forwardButton: ToolbarButton = .forwardButton()
-    private var _backButton: ToolbarButton = .backButton()
-    private var _stopReloadButton: ToolbarButton = .reloadButton()
-
-    var locationView = BrowserLocationView()
-    var currentURL: NSURL? = nil
-
-    var locationBorderColor: UIColor = .redColor()
-    var locationActiveBorderColor: UIColor = .blueColor()
-    var helper: BrowserToolbarHelper?
-    var isTransitioning: Bool = false
-
-    weak var delegate: URLBarDelegate?
-    weak var browserToolbarDelegate: BrowserToolbarDelegate?
-
-    private(set) var toolbarIsShowing: Bool = false
-    private(set) var inOverlayMode: Bool = false
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-    }
-
-    override func traitCollectionDidChange(previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-
-        if traitCollection.horizontalSizeClass == .Regular {
-            insideLeftButtons = [_backButton, _forwardButton, _stopReloadButton]
-            insideRightButtons = [_shareButton, _bookmarkButton]
-        } else {
-            insideLeftButtons = []
-            insideRightButtons = []
-        }
-    }
-
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-}
-
-extension URLBarView_V2: BrowserToolbarProtocol {
-    var shareButton: UIButton { return _shareButton }
-    var bookmarkButton: UIButton { return _bookmarkButton }
-    var forwardButton: UIButton { return _forwardButton }
-    var backButton: UIButton { return _backButton }
-    var stopReloadButton: UIButton { return _stopReloadButton }
-
-    var actionButtons: [UIButton] {
-        return [
-            self.shareButton,
-            self.bookmarkButton,
-            self.forwardButton,
-            self.backButton,
-            self.stopReloadButton
-        ]
-    }
-
-    func updateBackStatus(canGoBack: Bool) {
-        backButton.enabled = canGoBack
-    }
-
-    func updateForwardStatus(canGoForward: Bool) {
-        forwardButton.enabled = canGoForward
-    }
-
-    func updateBookmarkStatus(isBookmarked: Bool) {
-        bookmarkButton.selected = isBookmarked
-    }
-
-    func updateReloadStatus(isLoading: Bool) {
-        if isLoading {
-            stopReloadButton.setImage(UIImage.stopIcon(), forState: .Normal)
-            stopReloadButton.setImage(UIImage.stopPressedIcon(), forState: .Highlighted)
-        } else {
-            stopReloadButton.setImage(UIImage.reloadIcon(), forState: .Normal)
-            stopReloadButton.setImage(UIImage.reloadPressedIcon(), forState: .Highlighted)
-        }
-    }
-
-    func updatePageStatus(isWebPage isWebPage: Bool) {
-        bookmarkButton.enabled = isWebPage
-        stopReloadButton.enabled = isWebPage
-        shareButton.enabled = isWebPage
-    }
-}
-
-extension URLBarView_V2: BrowserLocationViewDelegate {
-    func browserLocationViewDidLongPressReaderMode(browserLocationView: BrowserLocationView) -> Bool {
-        return delegate?.urlBarDidLongPressReaderMode(self) ?? false
-    }
-
-    func browserLocationViewDidTapLocation(browserLocationView: BrowserLocationView) {
-        let locationText = delegate?.urlBarDisplayTextForURL(locationView.url)
-        enterOverlayMode(locationText, pasted: false)
-    }
-
-    func browserLocationViewDidLongPressLocation(browserLocationView: BrowserLocationView) {
-        delegate?.urlBarDidLongPressLocation(self)
-    }
-
-    func browserLocationViewDidTapReload(browserLocationView: BrowserLocationView) {
-        delegate?.urlBarDidPressReload(self)
-    }
-    
-    func browserLocationViewDidTapStop(browserLocationView: BrowserLocationView) {
-        delegate?.urlBarDidPressStop(self)
-    }
-
-    func browserLocationViewDidTapReaderMode(browserLocationView: BrowserLocationView) {
-        delegate?.urlBarDidPressReaderMode(self)
-    }
-
-    func browserLocationViewLocationAccessibilityActions(browserLocationView: BrowserLocationView) -> [UIAccessibilityCustomAction]? {
-        return delegate?.urlBarLocationAccessibilityActions(self)
-    }
-}
-
-extension URLBarView_V2: URLBarViewProtocol {
-    var view: UIView {
-        return self
-    }
-
-    func updateAlphaForSubviews(alpha: CGFloat) {
-
-    }
-
-    func updateTabCount(count: Int, animated: Bool) {
-
-    }
-
-    func updateProgressBar(progress: Float) {
-
-    }
-
-    func updateReaderModeState(state: ReaderModeState) {
-
-    }
-
-    func setAutocompleteSuggestion(suggestion: String?) {
-
-    }
-
-    func setShowToolbar(shouldShow: Bool) {
-
-    }
-
-    func enterOverlayMode(locationText: String?, pasted: Bool) {
-
-    }
-
-    func leaveOverlayMode(didCancel cancel: Bool = false) {
-
-    }
-
-    func applyTheme(themeName: String) {
-        
-    }
-
-    func SELdidClickCancel() {
-
     }
 }

@@ -87,7 +87,7 @@ protocol URLBarViewProtocol: Themeable {
     var toolbarIsShowing: Bool { get }
     var inOverlayMode: Bool { get }
 
-    var locationView: BrowserLocationView { get set }
+    var locationView: BrowserLocationView { get }
     var shareButton: UIButton { get }
     var bookmarkButton: UIButton { get }
     var forwardButton: UIButton { get }
@@ -881,6 +881,7 @@ private class CurveView: UIView {
 }
 
 class ToolbarTextField: AutocompleteTextField {
+
     static let Themes: [String: Theme] = {
         var themes = [String: Theme]()
         var theme = Theme()
