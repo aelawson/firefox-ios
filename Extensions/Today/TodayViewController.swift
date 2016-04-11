@@ -188,7 +188,7 @@ class TodayViewController: UIViewController, NCWidgetProviding {
     @objc func onPressOpenClibpoard(view: UIView) {
         if let urlString = UIPasteboard.generalPasteboard().string,
             _ = NSURL(string: urlString) {
-            openContainingApp(urlString)
+            openContainingApp("firefox://?url=\(urlString)")
         }
     }
 }
