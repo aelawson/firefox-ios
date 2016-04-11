@@ -40,21 +40,40 @@ class TodayViewController: UIViewController, NCWidgetProviding {
 
     private lazy var openURLFromClipboardView: UIView = {
         let view = UIView()
+        view.backgroundColor = UIColor.yellowColor()
+
         let button = UIButton()
         button.setTitle(NSLocalizedString("Go to copied link", tableName: "Today", comment: "Go to link on clipboard"), forState: .Normal)
         button.addTarget(self, action: #selector(onPressOpenClibpoard), forControlEvents: .TouchUpInside)
 
+        view.addSubview(button)
         return view
     }()
+
+    private lazy var buttonContainer: UIView = {
+        let view = UIView()
+        //view.backgroundColor = UIColor.redColor()
+        return view
+    }()
+
+    private var copiedURL: NSURL? {
+        if let string = UIPasteboard.generalPasteboard().string,
+            url = NSURL(string: string) where url.isWebPage() {
+            return url
+        } else {
+            return nil
+        }
+    }
+
+    private var hasCopiedURL: Bool {
+        return copiedURL != nil
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let buttonContainer = UIView()
         view.addSubview(buttonContainer)
-
 //        view.backgroundColor = UIColor.blueColor()
-//        buttonContainer.backgroundColor = UIColor.redColor()
 
         buttonContainer.snp_makeConstraints { make in
             make.width.equalTo(view.snp_width).multipliedBy(0.8)
@@ -88,11 +107,26 @@ class TodayViewController: UIViewController, NCWidgetProviding {
         }
 
         view.snp_makeConstraints { make in
-            make.height.equalTo(buttonContainer.snp_height).priorityLow()
+            let multiple = hasCopiedURL ? 2.0 : 1.0
+            make.height.equalTo(self.buttonContainer.snp_height).multipliedBy(multiple).priorityLow()
         }
-        view.systemLayoutSizeFittingSize(CGSizeZero)
+        view.addSubview(openURLFromClipboardView)
 
-        updateOpenClipboardButton()
+        guard let url = copiedURL else {
+            openURLFromClipboardView.hidden = true
+            return
+        }
+
+        log.info("Clipboard contains \(url)")
+
+        openURLFromClipboardView.snp_makeConstraints { make in
+            make.height.equalTo(buttonContainer.snp_height)
+            make.top.equalTo(buttonContainer.snp_bottom)
+            make.width.equalTo(view.snp_width)
+            make.centerX.equalTo(view.snp_centerX)
+        }
+
+        view.systemLayoutSizeFittingSize(CGSizeZero)
     }
 
     func widgetMarginInsetsForProposedMarginInsets(defaultMarginInsets: UIEdgeInsets) -> UIEdgeInsets {
@@ -120,7 +154,6 @@ class TodayViewController: UIViewController, NCWidgetProviding {
     
     func widgetPerformUpdateWithCompletionHandler(completionHandler: ((NCUpdateResult) -> Void)) {
         // Perform any setup necessary in order to update the view.
-        updateOpenClipboardButton()
 
         // If an error is encountered, use NCUpdateResult.Failed
         // If there's no update required, use NCUpdateResult.NoData
@@ -160,17 +193,5 @@ class TodayViewController: UIViewController, NCWidgetProviding {
             _ = NSURL(string: urlString) {
             openContainingApp(urlString)
         }
-    }
-
-    func updateOpenClipboardButton() {
-        log.info("Checking clipboard")
-        if let string = UIPasteboard.generalPasteboard().string,
-            _ = NSURL(string: string) {
-                log.info("We have a URL!")
-                openURLFromClipboardView.hidden = false
-        } else {
-            openURLFromClipboardView.hidden = true
-        }
-
     }
 }
