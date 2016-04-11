@@ -24,10 +24,10 @@ class URLToolbarRefTests: FXSnapshotTestCase {
 
     func testDefaultLayout_iPadPortrait() {
         toolbar = URLToolbar(frame: ipadPortrait)
-        toolbar.curveRightButtons = [UIButton()]
+        toolbar.curveRightButtons = [ToolbarButton()]
         toolbar.insideRightButtons = [.shareButton()]
         toolbar.insideLeftButtons = [.backButton(), .forwardButton(), .reloadButton()]
-        
+
         toolbar.setNeedsLayout()
         toolbar.layoutIfNeeded()
         FBSnapshotVerifyView(toolbar)

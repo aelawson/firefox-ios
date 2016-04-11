@@ -12,9 +12,25 @@ enum ToolbarButtonTag: Int {
     case Bookmarked
 }
 
+public class ToolbarButton: UIButton {
+    private class func createToolbarButton(
+        iconForState iconForState: [UIControlState: UIImage],
+        accessibilityLabel: String,
+        tag: ToolbarButtonTag? = nil
+    ) -> ToolbarButton {
+        let button = ToolbarButton()
+        for (state, icon) in iconForState { button.setImage(icon, forState: state) }
+        button.accessibilityLabel = accessibilityLabel
+        if let tag = tag {
+            button.tag = tag.rawValue
+        }
+        return button
+    }
+}
+
 // MARK: - Browser Toolbar Buttons
-extension UIButton {
-    class func backButton() -> UIButton {
+extension ToolbarButton {
+    class func backButton() -> ToolbarButton {
         return createToolbarButton(
             iconForState: [
                 .Normal: UIImage.backIcon(),
@@ -25,7 +41,7 @@ extension UIButton {
         )
     }
 
-    class func forwardButton() -> UIButton {
+    class func forwardButton() -> ToolbarButton {
         return createToolbarButton(
             iconForState: [
                 .Normal: UIImage.forwardIcon(),
@@ -36,7 +52,7 @@ extension UIButton {
         )
     }
 
-    class func reloadButton() -> UIButton {
+    class func reloadButton() -> ToolbarButton {
         return createToolbarButton(
             iconForState: [
                 .Normal: UIImage.reloadIcon(),
@@ -47,7 +63,7 @@ extension UIButton {
         )
     }
 
-    class func shareButton() -> UIButton {
+    class func shareButton() -> ToolbarButton {
         return createToolbarButton(
             iconForState: [
                 .Normal: UIImage.shareIcon(),
@@ -58,7 +74,7 @@ extension UIButton {
         )
     }
 
-    class func bookmarkedButton() -> UIButton {
+    class func bookmarkedButton() -> ToolbarButton {
         return createToolbarButton(
             iconForState: [
                 .Normal: UIImage.bookmarkIcon(),
@@ -72,8 +88,8 @@ extension UIButton {
 }
 
 // MARK: - Panel Toolbar Buttons
-extension UIButton {
-    class func topSitesPanelButton() -> UIButton {
+extension ToolbarButton {
+    class func topSitesPanelButton() -> ToolbarButton {
         return createToolbarButton(
             iconForState: [
                 .Normal: UIImage.topSitesPanelIcon(),
@@ -83,7 +99,7 @@ extension UIButton {
         )
     }
 
-    class func bookmarksPanelButton() -> UIButton {
+    class func bookmarksPanelButton() -> ToolbarButton {
         return createToolbarButton(
             iconForState: [
                 .Normal: UIImage.bookmarksPanelIcon(),
@@ -93,7 +109,7 @@ extension UIButton {
         )
     }
 
-    class func historyPanelButton() -> UIButton {
+    class func historyPanelButton() -> ToolbarButton {
         return createToolbarButton(
             iconForState: [
                 .Normal: UIImage.historyPanelIcon(),
@@ -103,7 +119,7 @@ extension UIButton {
         )
     }
 
-    class func syncedTabsPanelButton() -> UIButton {
+    class func syncedTabsPanelButton() -> ToolbarButton {
         return createToolbarButton(
             iconForState: [
                 .Normal: UIImage.syncedTabsPanelIcon(),
@@ -113,7 +129,7 @@ extension UIButton {
         )
     }
 
-    class func readingListPanelButton() -> UIButton {
+    class func readingListPanelButton() -> ToolbarButton {
         return createToolbarButton(
             iconForState: [
                 .Normal: UIImage.readingListPanelIcon(),
@@ -121,20 +137,6 @@ extension UIButton {
             ],
             accessibilityLabel: NSLocalizedString("Reading list", comment: "Panel accessibility label")
         )
-    }
-}
-
-private extension UIButton {
-    class func createToolbarButton(iconForState iconForState: [UIControlState: UIImage], accessibilityLabel: String, tag: ToolbarButtonTag? = nil) -> UIButton {
-        let button = UIButton()
-        for (state, icon) in iconForState { button.setImage(icon, forState: state) }
-        button.accessibilityLabel = accessibilityLabel
-//        button.layer.borderColor = UIColor.blackColor().CGColor
-//        button.layer.borderWidth = 1
-        if let tag = tag {
-            button.tag = tag.rawValue
-        }
-        return button
     }
 }
 

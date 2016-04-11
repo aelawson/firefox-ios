@@ -88,13 +88,13 @@ protocol URLBarViewProtocol: Themeable {
     var inOverlayMode: Bool { get }
 
     var locationView: BrowserLocationView { get set }
-    var shareButton: UIButton { get set }
-    var bookmarkButton: UIButton { get set }
-    var forwardButton: UIButton { get set }
-    var backButton: UIButton { get set }
-    var stopReloadButton: UIButton { get set }
+    var shareButton: UIButton { get }
+    var bookmarkButton: UIButton { get }
+    var forwardButton: UIButton { get }
+    var backButton: UIButton { get }
+    var stopReloadButton: UIButton { get }
 
-    var actionButtons: [UIButton] { get set }
+    var actionButtons: [UIButton] { get }
 
     var currentURL: NSURL? { get set }
 

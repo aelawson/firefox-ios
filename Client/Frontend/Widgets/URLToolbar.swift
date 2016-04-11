@@ -8,19 +8,19 @@ import SnapKit
 private let buttonSize: CGFloat = 40
 
 class URLToolbar: UIView {
-    var curveRightButtons = [UIButton]() {
+    var curveRightButtons = [ToolbarButton]() {
         didSet {
             didSetToolbarButtons(curveRightButtons, forContainer: curveRightButtonContainer)
         }
     }
 
-    var insideRightButtons = [UIButton]() {
+    var insideRightButtons = [ToolbarButton]() {
         didSet {
             didSetToolbarButtons(insideRightButtons, forContainer: insideRightButtonContainer)
         }
     }
 
-    var insideLeftButtons = [UIButton]() {
+    var insideLeftButtons = [ToolbarButton]() {
         didSet {
             didSetToolbarButtons(insideLeftButtons, forContainer: insideLeftButtonContainer)
         }
@@ -53,7 +53,7 @@ class URLToolbar: UIView {
         }
     }
 
-    private func didSetToolbarButtons(newButtons: [UIButton], forContainer container: ToolbarButtonContainer) {
+    private func didSetToolbarButtons(newButtons: [ToolbarButton], forContainer container: ToolbarButtonContainer) {
         container.buttons = newButtons
         setNeedsUpdateConstraints()
         setNeedsLayout()
@@ -129,7 +129,7 @@ class URLToolbar: UIView {
 }
 
 private class ToolbarButtonContainer: UIView {
-    var buttons: [UIButton] = [] {
+    var buttons: [ToolbarButton] = [] {
         didSet(oldButtons) {
             oldButtons.forEach { $0.removeFromSuperview() }
             buttons.forEach { addSubview($0) }
@@ -246,18 +246,11 @@ private class CurveBackgroundView: UIView {
 }
 
 class URLBarView_V2: URLToolbar {
-    lazy var shareButton: UIButton = .shareButton()
-    lazy var bookmarkButton: UIButton = .bookmarkedButton()
-    lazy var forwardButton: UIButton = .forwardButton()
-    lazy var backButton: UIButton = .backButton()
-    lazy var stopReloadButton: UIButton = .reloadButton()
-    lazy var actionButtons: [UIButton] = [
-        self.shareButton,
-        self.bookmarkButton,
-        self.forwardButton,
-        self.backButton,
-        self.stopReloadButton
-    ]
+    private var _shareButton: ToolbarButton = .shareButton()
+    private var _bookmarkButton: ToolbarButton = .bookmarkedButton()
+    private var _forwardButton: ToolbarButton = .forwardButton()
+    private var _backButton: ToolbarButton = .backButton()
+    private var _stopReloadButton: ToolbarButton = .reloadButton()
 
     var locationView = BrowserLocationView()
     var currentURL: NSURL? = nil
@@ -281,8 +274,8 @@ class URLBarView_V2: URLToolbar {
         super.traitCollectionDidChange(previousTraitCollection)
 
         if traitCollection.horizontalSizeClass == .Regular {
-            insideLeftButtons = [backButton, forwardButton, stopReloadButton]
-            insideRightButtons = [shareButton, bookmarkButton]
+            insideLeftButtons = [_backButton, _forwardButton, _stopReloadButton]
+            insideRightButtons = [_shareButton, _bookmarkButton]
         } else {
             insideLeftButtons = []
             insideRightButtons = []
@@ -296,6 +289,22 @@ class URLBarView_V2: URLToolbar {
 }
 
 extension URLBarView_V2: BrowserToolbarProtocol {
+    var shareButton: UIButton { return _shareButton }
+    var bookmarkButton: UIButton { return _bookmarkButton }
+    var forwardButton: UIButton { return _forwardButton }
+    var backButton: UIButton { return _backButton }
+    var stopReloadButton: UIButton { return _stopReloadButton }
+
+    var actionButtons: [UIButton] {
+        return [
+            self.shareButton,
+            self.bookmarkButton,
+            self.forwardButton,
+            self.backButton,
+            self.stopReloadButton
+        ]
+    }
+
     func updateBackStatus(canGoBack: Bool) {
         backButton.enabled = canGoBack
     }
