@@ -10,6 +10,7 @@ import SnapKit
 private let log = Logger.browserLogger
 
 private let privateBrowsingColor = UIColor(colorString: "CE6EFC")
+private let backgroundHightlightColor = UIColor(white: 216.0/255.0, alpha: 44.0/255.0)
 
 @objc (TodayViewController)
 class TodayViewController: UIViewController, NCWidgetProviding {
@@ -39,15 +40,11 @@ class TodayViewController: UIViewController, NCWidgetProviding {
     }()
 
     private lazy var openURLFromClipboardView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor.yellowColor()
-
         let button = UIButton()
         button.setTitle(NSLocalizedString("Go to copied link", tableName: "Today", comment: "Go to link on clipboard"), forState: .Normal)
         button.addTarget(self, action: #selector(onPressOpenClibpoard), forControlEvents: .TouchUpInside)
-
-        view.addSubview(button)
-        return view
+        button.setBackgroundColor(backgroundHightlightColor, forState: .Highlighted)
+        return button
     }()
 
     private lazy var buttonContainer: UIView = {
@@ -193,5 +190,21 @@ class TodayViewController: UIViewController, NCWidgetProviding {
             _ = NSURL(string: urlString) {
             openContainingApp(urlString)
         }
+    }
+}
+
+extension UIButton {
+    func setBackgroundColor(color: UIColor, forState state: UIControlState) {
+        let colorView = UIView(frame: CGRectMake(0, 0, 1, 1))
+        colorView.backgroundColor = color
+
+        UIGraphicsBeginImageContext(colorView.bounds.size)
+        if let context = UIGraphicsGetCurrentContext() {
+            colorView.layer.renderInContext(context)
+        }
+        let colorImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        self.setBackgroundImage(colorImage, forState: state)
     }
 }
